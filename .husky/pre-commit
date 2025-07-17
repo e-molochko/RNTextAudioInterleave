@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+git diff --cached --name-only --diff-filter=ACMR | xargs -I % sh -c 'prettier "%" --write --ignore-unknown || true'
+git update-index --again

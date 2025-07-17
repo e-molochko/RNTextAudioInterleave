@@ -6,8 +6,27 @@ node_modules/
 # Expo
 .expo/
 dist/
-web-build/
-expo-env.d.ts
+
+# React Native builds
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/*.keystore
+android/app/release/
+android/app/debug/
+
+# iOS builds
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+ios/DerivedData/
+ios/Podfile.lock
+
+# VSCode
+.vscode/
 
 # Native
 .kotlin/
@@ -36,4 +55,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-app-example
+# Jest
+coverage/
+*.lcov
+.nyc_output/
+
+# Testing
+.jest/
+
