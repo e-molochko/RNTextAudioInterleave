@@ -18,13 +18,15 @@ RNTextAudioInterleave/
 │   ├── player.tsx         # Screen 2: Audio player with transcript
 │   └── _layout.tsx        # Navigation layout
 ├── components/            # Reusable UI components
+├── hooks/                 # Custom React hooks
+├── constants/             # App constants and colors
 ├── assets/               # Audio files and transcripts
 └── package.json
 ```
 
 ## Prerequisites
 
-- **Node.js** (v18 or higher)
+- **Node.js** (v20.18.1 or higher - required for undici package)
 - **npm** or **yarn**
 - **Expo CLI**: `npm install -g @expo/cli`
 
@@ -120,6 +122,8 @@ Then press:
 
 ```bash
 # Build for web production
+npm run build:web
+# or
 npx expo export --platform web
 ```
 
@@ -127,7 +131,14 @@ Output will be in `dist/` folder, ready for deployment to any static hosting ser
 
 ### Android Build
 
-#### Using EAS Build (Recommended)
+```bash
+# Build locally (requires Android Studio setup)
+npm run build:android
+# or
+npx expo run:android --variant release
+```
+
+**Note**: For CI/CD builds, use EAS Build:
 
 ```bash
 # Install EAS CLI
@@ -143,49 +154,41 @@ eas build --platform android --profile preview
 eas build --platform android --profile production
 ```
 
-#### Local Build
-
-```bash
-# Build locally (requires Android Studio setup)
-npx expo run:android --variant release
-```
-
 ### iOS Build (macOS only)
 
-#### Using EAS Build (Recommended)
+```bash
+# Build locally (requires Xcode)
+npm run build:ios
+# or
+npx expo run:ios --configuration Release
+```
+
+**Note**: For CI/CD builds, use EAS Build:
 
 ```bash
 # Build for iOS
 eas build --platform ios --profile production
 ```
 
-#### Local Build
-
-```bash
-# Build locally (requires Xcode)
-npx expo run:ios --configuration Release
-```
-
 ## Deployment
 
 ### Web Deployment
 
-#### Vercel
+#### Netlify (Recommended)
 
-```bash
-# Install Vercel CLI
-npm install -g vercel
+1. **Connect your repository to Netlify**
+2. **Configure build settings:**
+   - Build command: `npm run build:web`
+   - Publish directory: `dist`
+   - Node version: `20.18.1` or higher
 
-# Deploy
-npx expo export --platform web
-vercel --prod
-```
+3. **Automatic deployment**: Netlify will automatically deploy on every push to your main branch
 
-#### Netlify
+#### Manual Deployment
 
 ```bash
 # Build
-npx expo export --platform web
+npm run build:web
 
 # Deploy to Netlify (drag & drop dist folder)
 # Or use Netlify CLI
@@ -193,28 +196,22 @@ npm install -g netlify-cli
 netlify deploy --prod --dir dist
 ```
 
-#### GitHub Pages
+#### Other Platforms
 
-```bash
-# Build
-npx expo export --platform web
-
-# Deploy to gh-pages branch
-npm install -g gh-pages
-gh-pages -d dist
-```
+- **Vercel**: Connect repository and set build command to `npm run build:web`
+- **GitHub Pages**: Use GitHub Actions with the same build command
 
 ### Mobile App Deployment
 
 #### Android (Google Play Store)
 
-1. Build production AAB using EAS Build
+1. Build production AAB using local build or EAS Build
 2. Upload to Google Play Console
 3. Follow Play Store review process
 
 #### iOS (App Store)
 
-1. Build production IPA using EAS Build
+1. Build production IPA using local build or EAS Build
 2. Upload to App Store Connect
 3. Follow App Store review process
 
@@ -241,13 +238,42 @@ yarn test:coverage
 
 ### Test Structure
 
+Tests are placed next to the components they test:
+
 ```
-__tests__/
-├── components/        # Component tests
-├── screens/          # Screen tests
-├── utils/            # Utility function tests
-└── __mocks__/        # Mock files
+components/
+├── ComponentName.tsx
+└── ComponentName.test.tsx
+
+app/
+├── screen-name/
+│   ├── index.tsx
+│   └── index.test.tsx
 ```
+
+## Code Formatting
+
+This project uses Prettier for code formatting with automatic formatting on commit.
+
+### Pre-commit Hook
+
+The project includes a pre-commit hook that automatically formats staged files:
+
+```bash
+# Format all files
+npm run format
+
+# Check formatting
+npm run format:check
+```
+
+### VS Code Setup
+
+For the best development experience:
+
+1. Install the Prettier extension
+2. Set Prettier as the default formatter for TypeScript/TSX files
+3. Enable "Format on Save" and "Format on Paste"
 
 ## Audio Files Format
 
@@ -311,6 +337,19 @@ cd ios && xcodebuild clean && cd ..
 ```bash
 # Clear web cache
 rm -rf .expo && npm start
+```
+
+#### Node.js version issues
+
+If you encounter `undici` package errors, ensure you're using Node.js v20.18.1 or higher:
+
+```bash
+# Check Node version
+node --version
+
+# Update Node.js (recommended: use nvm)
+nvm install 20.18.1
+nvm use 20.18.1
 ```
 
 ### Platform-Specific Issues
