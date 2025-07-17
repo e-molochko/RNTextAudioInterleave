@@ -4,6 +4,7 @@ export const useAudioPlayer = jest.fn(() => ({
   currentTime: 83000, // 01:23 in milliseconds
   totalDuration: 360000, // 06:00 in milliseconds
   hasEnded: false,
+  isRepeating: false,
   phrases: [
     {
       id: "0",
@@ -50,6 +51,8 @@ export const useAudioPlayer = jest.fn(() => ({
   goToPrevious: jest.fn(),
   goToNext: jest.fn(),
   seekToPhrase: jest.fn(),
+  repeatLastPhrase: jest.fn(),
+  repeatSpecificPhrase: jest.fn(),
   play: jest.fn(),
   pause: jest.fn(),
   stop: jest.fn(),

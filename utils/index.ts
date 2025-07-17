@@ -1,1 +1,1 @@
-export * from "./formatAudioData";
+export { formatAudioData } from "./formatAudioData";

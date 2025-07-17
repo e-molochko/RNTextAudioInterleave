@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { useLocalSearchParams, router } from "expo-router";
-import { SafeAreaView, Text, View, FlatList, Platform, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, useFocusEffect } from "expo-router";
+import { SafeAreaView, Text, View, FlatList, Platform } from "react-native";
 
 import { AudioControls } from "@components/AudioControls";
 import { Message } from "@components/Message";
-import { Colors } from "@constants/Colors";
-import { Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer } from "@hooks/useAudioPlayer";
 import { AudioSubtitle } from "@models/audio";
 
@@ -43,10 +41,13 @@ export default function Player() {
     currentTime,
     totalDuration,
     hasEnded,
+    isRepeating,
     phrases,
     togglePlayPause,
     goToPrevious,
     goToNext,
+    repeatLastPhrase,
+    repeatSpecificPhrase,
     formatTime,
     progress,
   } = useAudioPlayer(audioData, filename || "example_audio");
@@ -62,14 +63,21 @@ export default function Player() {
     }
   }, [currentPhraseIndex, phrases.length]);
 
+  const handleRepeatMessage = (index: number) => {
+    repeatSpecificPhrase(index);
+  };
+
   const renderMessage = ({ item, index }: { item: any; index: number }) => {
     const isActive = index === currentPhraseIndex;
+    const onRepeat = () => handleRepeatMessage(index);
     return (
       <Message
         isLeftSpeaker={index % 2 === 0}
         speaker={item.speaker}
         text={item.text}
         isActive={isActive}
+        onRepeat={onRepeat}
+        index={index}
       />
     );
   };
@@ -122,7 +130,9 @@ export default function Player() {
           onPlayPause={togglePlayPause}
           onPrevious={goToPrevious}
           onNext={goToNext}
+          onRepeat={repeatLastPhrase}
           hasEnded={hasEnded}
+          isRepeating={isRepeating}
         />
       </View>
     </SafeAreaView>

@@ -109,19 +109,19 @@ jest.mock(
 jest.mock(
   "@assets/example_audio2.json",
   () => ({
-    pause: 800,
+    pause: 500,
     speakers: [
       {
         name: "Speaker A",
         phrases: [
-          { words: "Are you almost ready?", time: 1400 },
-          { words: "Okay, hurry up!", time: 1200 },
+          { words: "Are you almost ready?", time: 1800 },
+          { words: "Okay, hurry up!", time: 1500 },
         ],
       },
       {
         name: "Speaker B",
         phrases: [
-          { words: "Just about! Let me grab my keys.", time: 1800 },
+          { words: "Just about! Let me grab my keys.", time: 4500 },
           { words: "Coming down now!", time: 1100 },
         ],
       },
@@ -208,7 +208,7 @@ describe("Player", () => {
     // Should call useAudioPlayer with the second audio file data
     expect(useAudioPlayer).toHaveBeenCalledWith(
       expect.objectContaining({
-        pause: 800,
+        pause: 500,
         speakers: expect.arrayContaining([
           expect.objectContaining({
             name: "Speaker A",

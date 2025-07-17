@@ -12,7 +12,7 @@ export const formatAudioData = (audioData: AudioSubtitle) => {
       if (speaker.phrases[i]) {
         const phrase = speaker.phrases[i];
         const startTime = cumulativeTime;
-        const endTime = cumulativeTime + phrase.time;
+        const endTime = cumulativeTime + phrase.time; // Phrase ends here (no pause included)
 
         phrases.push({
           id: `${phraseId++}`,
@@ -22,9 +22,10 @@ export const formatAudioData = (audioData: AudioSubtitle) => {
           pauseAfter: audioData.pause,
           totalDuration: phrase.time + audioData.pause,
           startTime,
-          endTime: endTime + audioData.pause, // Include pause in end time
+          endTime, // Phrase actually ends here, pause is silence after
         });
 
+        // Next phrase starts after both the phrase duration AND the pause
         cumulativeTime = endTime + audioData.pause;
       }
     });

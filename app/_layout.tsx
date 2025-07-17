@@ -27,6 +27,7 @@ export default function RootLayout() {
           name="home/index"
           options={{
             title: "Home",
+            headerLeft: () => null,
           }}
         />
         <Stack.Screen
@@ -36,7 +37,7 @@ export default function RootLayout() {
             headerLeft: () => (
               <TouchableOpacity
                 onPress={() => router.navigate("/home")}
-                style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+                style={{ marginHorizontal: 10, marginVertical: 3 }}
               >
                 <Ionicons name="arrow-back" size={24} color="#111" />
               </TouchableOpacity>

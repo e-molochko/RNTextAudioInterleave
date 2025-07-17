@@ -16,7 +16,9 @@ interface AudioControlsProps {
   onPlayPause: () => void;
   onPrevious: () => void;
   onNext: () => void;
+  onRepeat: () => void;
   hasEnded?: boolean;
+  isRepeating?: boolean;
 }
 
 export const AudioControls: React.FC<AudioControlsProps> = ({
@@ -28,7 +30,9 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
   onPlayPause,
   onPrevious,
   onNext,
+  onRepeat,
   hasEnded = false,
+  isRepeating = false,
 }) => {
   return (
     <View style={styles.outerContainer}>
@@ -51,6 +55,18 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
             testID="previous-button"
           >
             <Ionicons name="play-skip-back" size={24} color={Colors.controlButton} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={onRepeat}
+            style={[styles.controlButton, isRepeating && styles.repeatButtonActive]}
+            testID="repeat-button"
+          >
+            <Ionicons
+              name="repeat"
+              size={20}
+              color={isRepeating ? Colors.progressBar : Colors.controlButton}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -125,13 +141,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 40,
+    gap: 30,
   },
   controlButton: {
     width: 44,
     height: 44,
     justifyContent: "center",
     alignItems: "center",
+  },
+  repeatButtonActive: {
+    backgroundColor: Colors.progressBackground,
+    borderRadius: 22,
   },
   playButton: {
     width: 60,

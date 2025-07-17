@@ -6,7 +6,7 @@
       "phrases": [
         {
           "words": "Are you almost ready?",
-          "time": 1400
+          "time": 1800
         },
         {
           "words": "Okay, hurry up!",
@@ -19,7 +19,7 @@
       "phrases": [
         {
           "words": "Just about! Let me grab my keys.",
-          "time": 5000
+          "time": 4500
         },
         {
           "words": "Coming down now!",

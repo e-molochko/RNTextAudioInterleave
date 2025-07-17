@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { useAudioPlayer as useExpoAudioPlayer, AudioSource } from "expo-audio";
+import { useFocusEffect } from "expo-router";
 
 import { AudioSubtitle, PlaybackPhrase } from "@models/audio";
 import { formatAudioData } from "@utils/formatAudioData";
@@ -26,9 +27,26 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
   const [hasEnded, setHasEnded] = useState(false);
+  const [isRepeating, setIsRepeating] = useState(false);
+  const [repeatPhraseIndex, setRepeatPhraseIndex] = useState<number | null>(null);
 
   const playbackPhrases = useRef<PlaybackPhrase[]>([]);
   const positionUpdateInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const originalPlaybackRate = useRef<number>(1.0);
+
+  // Stop audio when screen loses focus (navigation back)
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        if (positionUpdateInterval.current) {
+          clearInterval(positionUpdateInterval.current);
+        }
+        if (stop) {
+          stop();
+        }
+      };
+    }, [])
+  );
 
   useEffect(() => {
     if (!audioData) return;
@@ -42,10 +60,10 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   // Sync with player state
   useEffect(() => {
     setIsPlaying(player.playing);
-    setCurrentTime(player.currentTime * 1000); // Convert to milliseconds
+    setCurrentTime(player.currentTime * 1000);
 
     if (player.duration) {
-      setTotalDuration(player.duration * 1000); // Convert to milliseconds
+      setTotalDuration(player.duration * 1000);
     }
   }, [player.playing, player.currentTime, player.duration]);
 
@@ -59,7 +77,7 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     }
   };
 
-  // Position tracking
+  // Position tracking with repeat mode handling
   useEffect(() => {
     if (isPlaying) {
       positionUpdateInterval.current = setInterval(() => {
@@ -67,12 +85,26 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
         setCurrentTime(position);
         updateCurrentPhrase(position);
 
-        // Check if audio has ended
-        if (position >= totalDuration && totalDuration > 0) {
-          setIsPlaying(false);
-          setHasEnded(true);
+        // Handle repeat mode - stop at end of current phrase
+        if (isRepeating && repeatPhraseIndex !== null) {
+          const repeatPhrase = playbackPhrases.current[repeatPhraseIndex];
+          // Add a small buffer (50ms) to stop slightly before the actual end to avoid overlap
+          const stopTime = repeatPhrase.endTime - 50;
+          if (position >= stopTime) {
+            pause();
+            setIsRepeating(false);
+            setRepeatPhraseIndex(null);
+            // Reset playback rate to normal
+            player.setPlaybackRate?.(originalPlaybackRate.current);
+          }
+        } else {
+          // Check if audio has ended
+          if (position >= totalDuration && totalDuration > 0) {
+            setIsPlaying(false);
+            setHasEnded(true);
+          }
         }
-      }, 100);
+      }, 50); // Reduced interval for better precision
     } else {
       if (positionUpdateInterval.current) {
         clearInterval(positionUpdateInterval.current);
@@ -84,7 +116,14 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
         clearInterval(positionUpdateInterval.current);
       }
     };
-  }, [isPlaying, player.currentTime, currentPhraseIndex, totalDuration]);
+  }, [
+    isPlaying,
+    player.currentTime,
+    currentPhraseIndex,
+    totalDuration,
+    isRepeating,
+    repeatPhraseIndex,
+  ]);
 
   const play = async () => {
     player.play();
@@ -104,6 +143,10 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     setCurrentTime(0);
     setCurrentPhraseIndex(0);
     setHasEnded(false);
+    setIsRepeating(false);
+    setRepeatPhraseIndex(null);
+    // Reset playback rate to normal
+    player.setPlaybackRate?.(originalPlaybackRate.current);
   };
 
   const restart = async () => {
@@ -111,6 +154,10 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     setCurrentTime(0);
     setCurrentPhraseIndex(0);
     setHasEnded(false);
+    setIsRepeating(false);
+    setRepeatPhraseIndex(null);
+    // Reset playback rate to normal
+    player.setPlaybackRate?.(originalPlaybackRate.current);
     await play();
   };
 
@@ -131,6 +178,32 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
       setCurrentPhraseIndex(phraseIndex);
       setCurrentTime(phrase.startTime);
       setHasEnded(false);
+    }
+  };
+
+  const repeatLastPhrase = async () => {
+    if (currentPhraseIndex !== null && currentPhraseIndex >= 0) {
+      await repeatSpecificPhrase(currentPhraseIndex);
+    }
+  };
+
+  const repeatSpecificPhrase = async (phraseIndex: number) => {
+    if (phraseIndex >= 0 && phraseIndex < playbackPhrases.current.length) {
+      // Stop current playback
+      await pause();
+
+      // Set repeat mode
+      setIsRepeating(true);
+      setRepeatPhraseIndex(phraseIndex);
+
+      // Set slow playback rate (0.75x)
+      player.setPlaybackRate?.(0.75);
+
+      // Seek to phrase start
+      await seekToPhrase(phraseIndex);
+
+      // Start playing
+      await play();
     }
   };
 
@@ -157,11 +230,14 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     currentTime,
     totalDuration,
     hasEnded,
+    isRepeating,
     phrases: playbackPhrases.current,
     togglePlayPause,
     goToPrevious,
     goToNext,
     seekToPhrase,
+    repeatLastPhrase,
+    repeatSpecificPhrase,
     play,
     pause,
     stop,
