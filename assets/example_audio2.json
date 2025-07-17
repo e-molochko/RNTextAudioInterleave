@@ -1,0 +1,31 @@
+{
+  "pause": 500,
+  "speakers": [
+    {
+      "name": "Speaker A",
+      "phrases": [
+        {
+          "words": "Are you almost ready?",
+          "time": 1400
+        },
+        {
+          "words": "Okay, hurry up!",
+          "time": 1500
+        }
+      ]
+    },
+    {
+      "name": "Speaker B",
+      "phrases": [
+        {
+          "words": "Just about! Let me grab my keys.",
+          "time": 5000
+        },
+        {
+          "words": "Coming down now!",
+          "time": 1100
+        }
+      ]
+    }
+  ]
+}

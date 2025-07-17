@@ -7,6 +7,8 @@
       "@hooks/*": ["./hooks/*"],
       "@components/*": ["./components/*"],
       "@constants/*": ["./constants/*"],
+      "@models/*": ["./models/*"],
+      "@utils/*": ["./utils/*"],
       "@assets/*": ["./assets/*"],
       "@app/*": ["./app/*"]
     }

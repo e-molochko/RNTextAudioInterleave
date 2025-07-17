@@ -5,25 +5,23 @@ import { FlatList, SafeAreaView, Text, TouchableOpacity, View } from "react-nati
 
 import { styles } from "./styles";
 
-// Sample audio files - in production, this would be dynamically loaded
+// Available audio files - based on actual files in assets folder
 const audioFiles = [
   {
     id: "1",
-    filename: "sample1",
-    title: "Sample Audio 1",
-    description: "First audio file with transcript",
+    filename: "example_audio",
+    title: "Example Audio Conversation",
+    description: "A conversation between John and Jack with synchronized subtitles",
+    speakers: ["John", "Jack"],
+    duration: "~15 seconds",
   },
   {
     id: "2",
-    filename: "sample2",
-    title: "Sample Audio 2",
-    description: "Second audio file with transcript",
-  },
-  {
-    id: "3",
-    filename: "sample3",
-    title: "Sample Audio 3",
-    description: "Third audio file with transcript",
+    filename: "example_audio2",
+    title: "Quick Chat",
+    description: "A brief conversation between Speaker A and Speaker B",
+    speakers: ["Speaker A", "Speaker B"],
+    duration: "~11 seconds",
   },
 ];
 
@@ -42,6 +40,8 @@ export default function HomeScreen() {
       <View style={styles.fileContent}>
         <Text style={styles.fileTitle}>{item.title}</Text>
         <Text style={styles.fileDescription}>{item.description}</Text>
+        <Text style={styles.fileSpeakers}>Speakers: {item.speakers.join(", ")}</Text>
+        <Text style={styles.fileDuration}>Duration: {item.duration}</Text>
         <Text style={styles.fileName}>
           Files: {item.filename}.mp3, {item.filename}.json
         </Text>
@@ -52,9 +52,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.header}>Select Audio File</Text>
+        <Text style={styles.header}>Audio Files</Text>
         <Text style={styles.subtitle}>
-          Choose an audio file to play with synchronized transcript
+          Select an audio file to play with synchronized transcript
         </Text>
 
         <FlatList

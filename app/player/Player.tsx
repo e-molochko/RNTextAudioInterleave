@@ -1,52 +1,128 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { SafeAreaView, Text, View, FlatList, Platform } from "react-native";
+
+import { AudioControls } from "@components/AudioControls";
+import { Message } from "@components/Message";
+import { useAudioPlayer } from "@hooks/useAudioPlayer";
+import { AudioSubtitle } from "@models/audio";
 
 import { styles } from "./styles";
 
-const ACTIONS = [
-  {
-    label: "Play/Pause",
-    icon: "play-circle",
-  },
-  { label: "Rewind", icon: "rewind" },
-  { label: "Forward", icon: "forward" },
-  { label: "Repeat", icon: "repeat" },
-];
+// Function to load audio data dynamically
+const loadAudioData = (filename: string): AudioSubtitle => {
+  switch (filename) {
+    case "example_audio":
+      return require("@assets/example_audio.json");
+    case "example_audio2":
+      return require("@assets/example_audio2.json");
+    default:
+      return require("@assets/example_audio.json");
+  }
+};
+
 export default function Player() {
   const { filename } = useLocalSearchParams<{ filename: string }>();
+  const flatListRef = useRef<FlatList>(null);
+  const [audioData, setAudioData] = useState<AudioSubtitle | null>(null);
+
+  // Load audio data when filename changes
+  useEffect(() => {
+    if (filename) {
+      const data = loadAudioData(filename);
+      setAudioData(data);
+    }
+  }, [filename]);
+
+  const {
+    isPlaying,
+    currentPhraseIndex,
+    currentTime,
+    totalDuration,
+    hasEnded,
+    phrases,
+    togglePlayPause,
+    goToPrevious,
+    goToNext,
+    formatTime,
+    progress,
+  } = useAudioPlayer(audioData, filename || "example_audio");
+
+  // Auto-scroll to current phrase
+  useEffect(() => {
+    if (flatListRef.current && phrases.length > 0 && currentPhraseIndex !== null) {
+      flatListRef.current.scrollToIndex({
+        index: currentPhraseIndex,
+        animated: true,
+        viewPosition: 0.5, // Center the item
+      });
+    }
+  }, [currentPhraseIndex, phrases.length]);
+
+  const renderMessage = ({ item, index }: { item: any; index: number }) => {
+    const isActive = index === currentPhraseIndex;
+    return (
+      <Message
+        isLeftSpeaker={index % 2 === 0}
+        speaker={item.speaker}
+        text={item.text}
+        isActive={isActive}
+      />
+    );
+  };
+
+  // Don't render until audio data is loaded
+  if (!audioData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.loadingText}>Loading audio...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const onScrollToIndexFailed = (info: { index: number }) => {
+    const t = setTimeout(() => {
+      if (flatListRef.current) {
+        flatListRef.current.scrollToIndex({
+          index: Math.min(info.index, phrases.length - 1),
+          animated: true,
+          viewPosition: 0.5,
+        });
+      }
+      clearTimeout(t);
+    }, 100);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.header}>Audio Player</Text>
+      <View style={[styles.chatContainer, Platform.OS === "web" && styles.webChatContainer]}>
+        <FlatList
+          ref={flatListRef}
+          data={phrases}
+          renderItem={renderMessage}
+          keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.messagesList}
+          onScrollToIndexFailed={onScrollToIndexFailed}
+        />
+      </View>
 
-        <Text style={styles.subtitle}>Playing: {filename || "No file selected"}</Text>
-
-        <View style={styles.placeholder}>
-          <Text style={styles.fileName}>• {filename}.mp3</Text>
-          <Text style={styles.fileName}>• {filename}.json</Text>
-        </View>
-
-        <View style={styles.controlsPlaceholder}>
-          <Text style={styles.sectionTitle}>Controls Placeholder</Text>
-          <View style={styles.controlsList}>
-            {ACTIONS.map(action => (
-              <Text key={action.label} style={styles.control}>
-                • {action.label}
-              </Text>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.transcriptPlaceholder}>
-          <Text style={styles.sectionTitle}>Transcript Placeholder</Text>
-          <Text style={styles.transcriptText}>
-            Synchronized transcript will appear here with highlighting
-          </Text>
-        </View>
-      </ScrollView>
+      <View style={styles.controlsWrapper}>
+        <AudioControls
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          totalDuration={totalDuration}
+          progress={progress}
+          formatTime={formatTime}
+          onPlayPause={togglePlayPause}
+          onPrevious={goToPrevious}
+          onNext={goToNext}
+          hasEnded={hasEnded}
+        />
+      </View>
     </SafeAreaView>
   );
 }

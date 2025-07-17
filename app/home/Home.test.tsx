@@ -4,19 +4,13 @@ import { fireEvent, render } from "@testing-library/react-native";
 
 import HomeScreen from "./Home";
 
-// Use the global mocks from __mocks__ directory
-// Get the mocked functions to track calls
+// Mock the router
 const mockPush = jest.fn();
-const mockBack = jest.fn();
 
-// Mock the expo-router module
 jest.mock("expo-router", () => ({
   useRouter: () => ({
     push: mockPush,
-    back: mockBack,
-  }),
-  useLocalSearchParams: () => ({
-    filename: "test-file",
+    back: jest.fn(),
   }),
 }));
 
@@ -28,48 +22,69 @@ describe("HomeScreen", () => {
   it("renders correctly", () => {
     const { getByText } = render(<HomeScreen />);
 
-    expect(getByText("Select Audio File")).toBeTruthy();
-    expect(getByText("Choose an audio file to play with synchronized transcript")).toBeTruthy();
+    expect(getByText("Audio Files")).toBeTruthy();
+    expect(getByText("Select an audio file to play with synchronized transcript")).toBeTruthy();
   });
 
   it("displays audio file list", () => {
     const { getByText } = render(<HomeScreen />);
 
-    expect(getByText("Sample Audio 1")).toBeTruthy();
-    expect(getByText("Sample Audio 2")).toBeTruthy();
-    expect(getByText("Sample Audio 3")).toBeTruthy();
+    // First audio file
+    expect(getByText("Example Audio Conversation")).toBeTruthy();
+    expect(
+      getByText("A conversation between John and Jack with synchronized subtitles")
+    ).toBeTruthy();
+    expect(getByText("Speakers: John, Jack")).toBeTruthy();
+    expect(getByText("Duration: ~15 seconds")).toBeTruthy();
+
+    // Second audio file
+    expect(getByText("Quick Chat")).toBeTruthy();
+    expect(getByText("A brief conversation between Speaker A and Speaker B")).toBeTruthy();
+    expect(getByText("Speakers: Speaker A, Speaker B")).toBeTruthy();
+    expect(getByText("Duration: ~6 seconds")).toBeTruthy();
   });
 
   it("shows file information", () => {
     const { getByText } = render(<HomeScreen />);
 
-    expect(getByText("Files: sample1.mp3, sample1.json")).toBeTruthy();
-    expect(getByText("Files: sample2.mp3, sample2.json")).toBeTruthy();
-    expect(getByText("Files: sample3.mp3, sample3.json")).toBeTruthy();
+    expect(getByText("Files: example_audio.mp3, example_audio.json")).toBeTruthy();
+    expect(getByText("Files: example_audio2.mp3, example_audio2.json")).toBeTruthy();
   });
 
   it("navigates to player screen when file is pressed", () => {
     const { getByText } = render(<HomeScreen />);
 
-    const firstFile = getByText("Sample Audio 1");
-    fireEvent.press(firstFile);
+    const audioFile = getByText("Example Audio Conversation");
+    fireEvent.press(audioFile);
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: "/player",
-      params: { filename: "sample1" },
+      params: { filename: "example_audio" },
     });
   });
 
-  it("navigates with correct filename for each file", () => {
+  it("navigates with correct filename for different files", () => {
     const { getByText } = render(<HomeScreen />);
 
-    // Test second file
-    const secondFile = getByText("Sample Audio 2");
-    fireEvent.press(secondFile);
+    // Test first file
+    const firstAudioFile = getByText("Example Audio Conversation");
+    fireEvent.press(firstAudioFile);
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: "/player",
-      params: { filename: "sample2" },
+      params: { filename: "example_audio" },
+    });
+
+    // Clear previous calls
+    mockPush.mockClear();
+
+    // Test second file
+    const secondAudioFile = getByText("Quick Chat");
+    fireEvent.press(secondAudioFile);
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/player",
+      params: { filename: "example_audio2" },
     });
   });
 });

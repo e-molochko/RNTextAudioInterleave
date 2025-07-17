@@ -50,6 +50,16 @@ export const styles = StyleSheet.create({
     opacity: 0.8,
     color: "#11181C",
   },
+  fileSpeakers: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#666666",
+  },
+  fileDuration: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#666666",
+  },
   fileName: {
     fontSize: 12,
     fontFamily: "SpaceMono",

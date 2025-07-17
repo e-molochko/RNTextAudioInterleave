@@ -1,6 +1,4 @@
 export const Audio = {
-  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: "granted" })),
-  setAudioModeAsync: jest.fn(() => Promise.resolve()),
   Sound: {
     createAsync: jest.fn(() =>
       Promise.resolve({
@@ -8,7 +6,12 @@ export const Audio = {
           playAsync: jest.fn(),
           pauseAsync: jest.fn(),
           setPositionAsync: jest.fn(),
-          setRateAsync: jest.fn(),
+          getStatusAsync: jest.fn(() =>
+            Promise.resolve({
+              isLoaded: true,
+              positionMillis: 0,
+            })
+          ),
           unloadAsync: jest.fn(),
         },
       })

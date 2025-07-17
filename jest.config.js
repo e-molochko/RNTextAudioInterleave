@@ -14,8 +14,11 @@ module.exports = {
     "^@hooks/(.*)$": "<rootDir>/hooks/$1",
     "^@components/(.*)$": "<rootDir>/components/$1",
     "^@constants/(.*)$": "<rootDir>/constants/$1",
+    "^@models/(.*)$": "<rootDir>/models/$1",
+    "^@utils/(.*)$": "<rootDir>/utils/$1",
     "^@assets/(.*)$": "<rootDir>/assets/$1",
     "^@app/(.*)$": "<rootDir>/app/$1",
+    "\\.(mp3|wav|ogg|m4a)$": "<rootDir>/__mocks__/audioFile.js",
   },
   testMatch: ["**/__tests__/**/*.(ts|tsx|js)", "**/*.(test|spec).(ts|tsx|js)"],
   collectCoverageFrom: [
