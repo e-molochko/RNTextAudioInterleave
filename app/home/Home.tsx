@@ -29,7 +29,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const handleFilePress = (filename: string) => {
-    router.push({
+    router.navigate({
       pathname: "/player",
       params: { filename },
     });

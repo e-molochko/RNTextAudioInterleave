@@ -6,10 +6,12 @@ import HomeScreen from "./Home";
 
 // Mock the router
 const mockPush = jest.fn();
+const mockNavigate = jest.fn();
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
     push: mockPush,
+    navigate: mockNavigate,
     back: jest.fn(),
   }),
 }));
@@ -41,7 +43,7 @@ describe("HomeScreen", () => {
     expect(getByText("Quick Chat")).toBeTruthy();
     expect(getByText("A brief conversation between Speaker A and Speaker B")).toBeTruthy();
     expect(getByText("Speakers: Speaker A, Speaker B")).toBeTruthy();
-    expect(getByText("Duration: ~6 seconds")).toBeTruthy();
+    expect(getByText("Duration: ~11 seconds")).toBeTruthy();
   });
 
   it("shows file information", () => {
@@ -57,7 +59,7 @@ describe("HomeScreen", () => {
     const audioFile = getByText("Example Audio Conversation");
     fireEvent.press(audioFile);
 
-    expect(mockPush).toHaveBeenCalledWith({
+    expect(mockNavigate).toHaveBeenCalledWith({
       pathname: "/player",
       params: { filename: "example_audio" },
     });
@@ -70,19 +72,19 @@ describe("HomeScreen", () => {
     const firstAudioFile = getByText("Example Audio Conversation");
     fireEvent.press(firstAudioFile);
 
-    expect(mockPush).toHaveBeenCalledWith({
+    expect(mockNavigate).toHaveBeenCalledWith({
       pathname: "/player",
       params: { filename: "example_audio" },
     });
 
     // Clear previous calls
-    mockPush.mockClear();
+    mockNavigate.mockClear();
 
     // Test second file
     const secondAudioFile = getByText("Quick Chat");
     fireEvent.press(secondAudioFile);
 
-    expect(mockPush).toHaveBeenCalledWith({
+    expect(mockNavigate).toHaveBeenCalledWith({
       pathname: "/player",
       params: { filename: "example_audio2" },
     });

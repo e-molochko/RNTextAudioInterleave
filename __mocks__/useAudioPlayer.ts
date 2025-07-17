@@ -3,7 +3,7 @@ export const useAudioPlayer = jest.fn(() => ({
   currentPhraseIndex: 0,
   currentTime: 83000, // 01:23 in milliseconds
   totalDuration: 360000, // 06:00 in milliseconds
-  isLoaded: true,
+  hasEnded: false,
   phrases: [
     {
       id: "0",
@@ -50,6 +50,10 @@ export const useAudioPlayer = jest.fn(() => ({
   goToPrevious: jest.fn(),
   goToNext: jest.fn(),
   seekToPhrase: jest.fn(),
+  play: jest.fn(),
+  pause: jest.fn(),
+  stop: jest.fn(),
+  restart: jest.fn(),
   formatTime: jest.fn(ms => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);

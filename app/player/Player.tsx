@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { useLocalSearchParams } from "expo-router";
-import { SafeAreaView, Text, View, FlatList, Platform } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { SafeAreaView, Text, View, FlatList, Platform, TouchableOpacity } from "react-native";
 
 import { AudioControls } from "@components/AudioControls";
 import { Message } from "@components/Message";
+import { Colors } from "@constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer } from "@hooks/useAudioPlayer";
 import { AudioSubtitle } from "@models/audio";
 

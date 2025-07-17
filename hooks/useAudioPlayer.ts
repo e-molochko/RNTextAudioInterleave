@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 
-import { Audio } from "expo-av";
+import { useAudioPlayer as useExpoAudioPlayer, AudioSource } from "expo-audio";
 
 import { AudioSubtitle, PlaybackPhrase } from "@models/audio";
 import { formatAudioData } from "@utils/formatAudioData";
 
 // Function to load audio file dynamically
-const loadAudioFile = (filename: string) => {
+const loadAudioFile = (filename: string): AudioSource => {
   switch (filename) {
     case "example_audio":
       return require("@assets/example_audio.mp3");
@@ -18,12 +18,13 @@ const loadAudioFile = (filename: string) => {
 };
 
 export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string) => {
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const audioSource = loadAudioFile(filename);
+  const player = useExpoAudioPlayer(audioSource);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [hasEnded, setHasEnded] = useState(false);
 
   const playbackPhrases = useRef<PlaybackPhrase[]>([]);
@@ -38,29 +39,15 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     setTotalDuration(cumulativeTime);
   }, [audioData]);
 
-  // Load audio file
+  // Sync with player state
   useEffect(() => {
-    const loadAudio = async () => {
-      try {
-        const audioFile = loadAudioFile(filename);
-        const { sound: audioSound } = await Audio.Sound.createAsync(audioFile, {
-          shouldPlay: false,
-        });
-        setSound(audioSound);
-        setIsLoaded(true);
-      } catch (error) {
-        console.error("Error loading audio:", error);
-      }
-    };
+    setIsPlaying(player.playing);
+    setCurrentTime(player.currentTime * 1000); // Convert to milliseconds
 
-    loadAudio();
-
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [filename]);
+    if (player.duration) {
+      setTotalDuration(player.duration * 1000); // Convert to milliseconds
+    }
+  }, [player.playing, player.currentTime, player.duration]);
 
   const updateCurrentPhrase = (position: number) => {
     const currentPhrase = playbackPhrases.current.findIndex(
@@ -74,19 +61,16 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
 
   // Position tracking
   useEffect(() => {
-    if (isPlaying && sound) {
-      positionUpdateInterval.current = setInterval(async () => {
-        const status = await sound.getStatusAsync();
-        if (status.isLoaded) {
-          const position = status.positionMillis || 0;
-          setCurrentTime(position);
-          updateCurrentPhrase(position);
+    if (isPlaying) {
+      positionUpdateInterval.current = setInterval(() => {
+        const position = player.currentTime * 1000; // Convert to milliseconds
+        setCurrentTime(position);
+        updateCurrentPhrase(position);
 
-          // Check if audio has ended
-          if (status.didJustFinish || position >= totalDuration) {
-            setIsPlaying(false);
-            setHasEnded(true);
-          }
+        // Check if audio has ended
+        if (position >= totalDuration && totalDuration > 0) {
+          setIsPlaying(false);
+          setHasEnded(true);
         }
       }, 100);
     } else {
@@ -100,41 +84,34 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
         clearInterval(positionUpdateInterval.current);
       }
     };
-  }, [isPlaying, sound, currentPhraseIndex, totalDuration]);
+  }, [isPlaying, player.currentTime, currentPhraseIndex, totalDuration]);
 
   const play = async () => {
-    if (sound && isLoaded) {
-      await sound.playAsync();
-      setIsPlaying(true);
-      setHasEnded(false);
-    }
+    player.play();
+    setIsPlaying(true);
+    setHasEnded(false);
   };
 
   const pause = async () => {
-    if (sound) {
-      await sound.pauseAsync();
-      setIsPlaying(false);
-    }
+    player.pause();
+    setIsPlaying(false);
   };
 
   const stop = async () => {
-    if (sound) {
-      await sound.stopAsync();
-      setIsPlaying(false);
-      setCurrentTime(0);
-      setCurrentPhraseIndex(0);
-      setHasEnded(false);
-    }
+    player.pause();
+    await player.seekTo(0);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setCurrentPhraseIndex(0);
+    setHasEnded(false);
   };
 
   const restart = async () => {
-    if (sound) {
-      await sound.setPositionAsync(0);
-      setCurrentTime(0);
-      setCurrentPhraseIndex(0);
-      setHasEnded(false);
-      await play();
-    }
+    await player.seekTo(0);
+    setCurrentTime(0);
+    setCurrentPhraseIndex(0);
+    setHasEnded(false);
+    await play();
   };
 
   const togglePlayPause = async () => {
@@ -148,9 +125,9 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   };
 
   const seekToPhrase = async (phraseIndex: number) => {
-    if (sound && phraseIndex >= 0 && phraseIndex < playbackPhrases.current.length) {
+    if (phraseIndex >= 0 && phraseIndex < playbackPhrases.current.length) {
       const phrase = playbackPhrases.current[phraseIndex];
-      await sound.setPositionAsync(phrase.startTime);
+      await player.seekTo(phrase.startTime / 1000); // Convert to seconds
       setCurrentPhraseIndex(phraseIndex);
       setCurrentTime(phrase.startTime);
       setHasEnded(false);
@@ -158,12 +135,12 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   };
 
   const goToPrevious = async () => {
-    const prevIndex = Math.max(0, currentPhraseIndex || 0 - 1);
+    const prevIndex = Math.max(0, (currentPhraseIndex || 0) - 1);
     await seekToPhrase(prevIndex);
   };
 
   const goToNext = async () => {
-    const nextIndex = Math.min(playbackPhrases.current.length - 1, currentPhraseIndex || 0 + 1);
+    const nextIndex = Math.min(playbackPhrases.current.length - 1, (currentPhraseIndex || 0) + 1);
     await seekToPhrase(nextIndex);
   };
 

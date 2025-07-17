@@ -1,7 +1,11 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { TouchableOpacity } from "react-native";
 import "react-native-reanimated";
+
+import { Ionicons } from "@expo/vector-icons";
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -29,6 +33,14 @@ export default function RootLayout() {
           name="player/index"
           options={{
             title: "Player",
+            headerLeft: () => (
+              <TouchableOpacity
+                onPress={() => router.navigate("/home")}
+                style={{ paddingHorizontal: 8, paddingVertical: 4 }}
+              >
+                <Ionicons name="arrow-back" size={24} color="#111" />
+              </TouchableOpacity>
+            ),
           }}
         />
         <Stack.Screen

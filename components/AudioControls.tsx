@@ -140,11 +140,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.playButton,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
   },
   playButtonEnded: {
     backgroundColor: Colors.controlButton,

@@ -10,6 +10,20 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
 
+  // Navigation header with back button
+  navHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.progressBackground,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
+
   // Loading state
   loadingContainer: {
     flex: 1,
@@ -113,11 +127,7 @@ export const styles = StyleSheet.create({
     backgroundColor: Colors.playButton,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
   },
 
   // Legacy styles (can be removed later)
@@ -145,10 +155,7 @@ export const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
     alignItems: "center",
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
     elevation: 3,
   },
   placeholderIcon: {
@@ -179,10 +186,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
     elevation: 3,
   },
   sectionTitle: {
@@ -202,10 +206,7 @@ export const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     flex: 1,
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    boxShadow: "0px 2px 4px rgba(0,0,0,0.1)",
     elevation: 3,
   },
   transcriptText: {
