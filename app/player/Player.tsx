@@ -86,9 +86,7 @@ export default function Player() {
   if (!audioData) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.loadingText}>Loading audio...</Text>
-        </View>
+        <Text style={styles.loadingText}>Loading audio...</Text>
       </SafeAreaView>
     );
   }
@@ -120,21 +118,19 @@ export default function Player() {
         />
       </View>
 
-      <View style={styles.controlsWrapper}>
-        <AudioControls
-          isPlaying={isPlaying}
-          currentTime={currentTime}
-          totalDuration={totalDuration}
-          progress={progress}
-          formatTime={formatTime}
-          onPlayPause={togglePlayPause}
-          onPrevious={goToPrevious}
-          onNext={goToNext}
-          onRepeat={repeatLastPhrase}
-          hasEnded={hasEnded}
-          isRepeating={isRepeating}
-        />
-      </View>
+      <AudioControls
+        isPlaying={isPlaying}
+        currentTime={currentTime}
+        totalDuration={totalDuration}
+        progress={progress}
+        formatTime={formatTime}
+        onPlayPause={togglePlayPause}
+        onPrevious={goToPrevious}
+        onNext={goToNext}
+        onRepeat={repeatLastPhrase}
+        hasEnded={hasEnded}
+        isRepeating={isRepeating}
+      />
     </SafeAreaView>
   );
 }
