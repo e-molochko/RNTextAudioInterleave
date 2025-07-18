@@ -38,7 +38,6 @@
       "description": "Audio player with synchronized transcript highlighting"
     },
     "plugins": [
-      "expo-dev-client",
       "expo-router",
       [
         "expo-font",

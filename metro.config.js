@@ -11,4 +11,16 @@ config.resolver.blockList = [
   /.*\/jest\.config\.js$/,
 ];
 
+// Add path aliases for React Native CLI compatibility
+config.resolver.alias = {
+  "@": __dirname,
+  "@assets": `${__dirname}/assets`,
+  "@components": `${__dirname}/components`,
+  "@constants": `${__dirname}/constants`,
+  "@hooks": `${__dirname}/hooks`,
+  "@models": `${__dirname}/models`,
+  "@utils": `${__dirname}/utils`,
+  "@app": `${__dirname}/app`,
+};
+
 module.exports = config;

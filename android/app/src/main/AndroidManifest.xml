@@ -27,7 +27,6 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="rntextaudiointerleave"/>
-        <data android:scheme="exp+rntextaudiointerleave"/>
       </intent-filter>
     </activity>
   </application>

@@ -106,6 +106,43 @@ npm run rn:android      # Terminal 2: Build & run Android
 - ✅ Direct native debugging
 - ✅ Pure React Native experience
 
+## Adding Expo Dev Client
+
+### Why Use Expo Dev Client?
+
+**Expo Dev Client** provides a custom build of Expo Go with full native module support. It's essential for:
+
+- **EAS Development Builds**: Cloud builds with development tools
+- **Custom Native Modules**: When Expo Go doesn't support your native dependencies
+- **Development Tools**: Expo's debugging and development features
+
+### How to Add Expo Dev Client
+
+```bash
+# Install expo-dev-client
+npm install expo-dev-client
+
+# Add to app.json plugins (if not already present)
+# "plugins": ["expo-dev-client"]
+
+# Build development client
+npm run build:dev-android  # or build:dev-ios
+```
+
+### When to Use vs Avoid
+
+**Use Dev Client when:**
+
+- Building with EAS (cloud builds)
+- Using custom native modules
+- Need Expo's development tools
+
+**Avoid Dev Client when:**
+
+- Using pure React Native CLI workflow
+- Want faster build cycles
+- Testing production-like builds
+
 ## Available Scripts
 
 ### Development
