@@ -165,10 +165,33 @@ npm run build:web
 
 ### Android (Google Play Store)
 
+#### EAS Build (Recommended)
+
 ```bash
 npm run build:preview-android  # Build APK via EAS
 # Upload to Google Play Console
 ```
+
+#### Local Build (Requires Android Studio)
+
+```bash
+# Generate native projects (if not already done)
+npm run prebuild
+
+# Build release APK
+cd android
+./gradlew assembleRelease
+cd ..
+
+# APK will be in: android/app/build/outputs/apk/release/app-release.apk
+```
+
+**Prerequisites for Local Build:**
+
+- Android Studio installed
+- Android SDK configured
+- Java Development Kit (JDK) 11 or higher
+- Environment variables set (ANDROID_HOME, JAVA_HOME)
 
 ### iOS (App Store)
 
@@ -258,18 +281,3 @@ npm run prebuild:clean
 | Performance    | Basic   | Good       | Best   |
 
 Choose the workflow that best fits your needs!
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Run tests: `npm test`
-5. Format code: `npm run format`
-6. Commit changes: `git commit -m "Description"`
-7. Push to branch: `git push origin feature-name`
-8. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License.
