@@ -7,6 +7,10 @@ import {
   useAudioSampleListener,
   AudioSample,
   AUDIO_SAMPLE_UPDATE,
+  PLAYBACK_STATUS_UPDATE,
+  AudioStatus,
+  AudioPlayer,
+  createAudioPlayer,
 } from "expo-audio";
 
 import { AudioSubtitle, PlaybackPhrase } from "@models/audio";
@@ -27,8 +31,9 @@ const loadAudioFile = (filename: string): AudioSource => {
 
 export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string) => {
   const audioSource = loadAudioFile(filename);
-  const player = useExpoAudioPlayer(audioSource);
-  const playerStatus = useAudioPlayerStatus(player);
+  // const player = useExpoAudioPlayer(audioSource);
+  const playerRef = useRef<AudioPlayer>(createAudioPlayer(audioSource));
+  const playerStatus = useAudioPlayerStatus(playerRef.current);
 
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState<number | null>(null);
   const [hasEnded, setHasEnded] = useState(false);
@@ -39,8 +44,8 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   const [phrases, setPhrases] = useState<PlaybackPhrase[]>([]);
   const [calculatedDuration, setCalculatedDuration] = useState(0);
 
-  const positionUpdateInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const originalPlaybackRate = useRef<number>(1.0);
+  const playbackListenerRef = useRef<ReturnType<typeof playerRef.current.addListener> | null>(null);
 
   useEffect(() => {
     if (!audioData) return;
@@ -56,15 +61,17 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
     useCallback(() => {
       return () => {
         // This runs when the screen loses focus
-        if (playerStatus.playing) {
-          player.pause();
+        playerRef.current.pause();
+        playerRef.current.remove();
+        if (playbackListenerRef.current) {
+          playbackListenerRef.current.remove();
         }
       };
-    }, [player, playerStatus.playing])
+    }, [])
   );
-  const handleSample = (sample: AudioSample) => {
-    console.log({ sample });
-    const { currentTime } = sample;
+  const handleSample = (status: AudioStatus) => {
+    if (!status.playing) return;
+    const { currentTime } = status;
     const position = currentTime * 1000; // Convert to milliseconds
     updateCurrentPhrase(position);
 
@@ -77,24 +84,30 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
         setIsRepeating(false);
         setRepeatPhraseIndex(null);
         // Reset playback rate to normal
-        player.setPlaybackRate?.(originalPlaybackRate.current);
+        playerRef.current.setPlaybackRate?.(originalPlaybackRate.current);
       }
     } else {
       // Check if audio has ended
-      const duration = playerStatus.duration ? playerStatus.duration * 1000 : calculatedDuration;
+      const duration = status.duration ? status.duration * 1000 : calculatedDuration;
       if (position >= duration && duration > 0) {
-        player.pause();
+        playerRef.current.pause();
         setHasEnded(true);
       }
     }
   };
   useEffect(() => {
-    const subscription = player.addListener(AUDIO_SAMPLE_UPDATE, handleSample);
-    return () => subscription.remove();
+    playbackListenerRef.current = playerRef.current.addListener(
+      PLAYBACK_STATUS_UPDATE,
+      handleSample
+    );
+    return () => {
+      if (playbackListenerRef.current) {
+        playbackListenerRef.current.remove();
+      }
+    };
   }, [phrases, calculatedDuration, hasEnded, playerStatus.playing, isRepeating, repeatPhraseIndex]);
 
   const updateCurrentPhrase = (position: number) => {
-    console.log(position, phrases.length);
     const currentPhrase = phrases.findIndex(
       phrase => position >= phrase.startTime && position < phrase.endTime
     );
@@ -105,36 +118,33 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   };
 
   const play = async () => {
-    player.play();
+    playerRef.current.play();
     setHasEnded(false);
   };
 
   const pause = async () => {
-    player.pause();
+    playerRef.current.pause();
   };
 
   const stop = async () => {
-    player.pause();
-    await player.seekTo(0);
-    // setIsPlaying(false); // This line is removed as per the edit hint
-    // setCurrentTime(0); // This line is removed as per the edit hint
+    playerRef.current.pause();
+    await playerRef.current.seekTo(0);
     setCurrentPhraseIndex(0);
     setHasEnded(false);
     setIsRepeating(false);
     setRepeatPhraseIndex(null);
     // Reset playback rate to normal
-    player.setPlaybackRate?.(originalPlaybackRate.current);
+    playerRef.current.setPlaybackRate?.(originalPlaybackRate.current);
   };
 
   const restart = async () => {
-    await player.seekTo(0);
-    // setCurrentTime(0); // This line is removed as per the edit hint
+    await playerRef.current.seekTo(0);
     setCurrentPhraseIndex(0);
     setHasEnded(false);
     setIsRepeating(false);
     setRepeatPhraseIndex(null);
     // Reset playback rate to normal
-    player.setPlaybackRate?.(originalPlaybackRate.current);
+    playerRef.current.setPlaybackRate?.(originalPlaybackRate.current);
     await play();
   };
 
@@ -151,7 +161,7 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
   const seekToPhrase = async (phraseIndex: number) => {
     if (phraseIndex >= 0 && phraseIndex < phrases.length) {
       const phrase = phrases[phraseIndex];
-      await player.seekTo(phrase.startTime / 1000); // Convert to seconds
+      await playerRef.current.seekTo(phrase.startTime / 1000); // Convert to seconds
       setCurrentPhraseIndex(phraseIndex);
       // setCurrentTime(phrase.startTime); // This line is removed as per the edit hint
       setHasEnded(false);
@@ -174,7 +184,7 @@ export const useAudioPlayer = (audioData: AudioSubtitle | null, filename: string
       setRepeatPhraseIndex(phraseIndex);
 
       // Set slow playback rate (0.75x)
-      player.setPlaybackRate?.(0.75);
+      playerRef.current.setPlaybackRate?.(0.75);
 
       // Seek to phrase start
       await seekToPhrase(phraseIndex);
