@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 import {
-  useAudioPlayer as useExpoAudioPlayer,
   AudioSource,
   useAudioPlayerStatus,
-  useAudioSampleListener,
-  AudioSample,
-  AUDIO_SAMPLE_UPDATE,
   PLAYBACK_STATUS_UPDATE,
   AudioStatus,
   AudioPlayer,
