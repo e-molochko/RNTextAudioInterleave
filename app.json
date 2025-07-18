@@ -8,10 +8,14 @@
     "scheme": "rntextaudiointerleave",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.egormolochko.RNTextAudioInterleave",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "UIAppFonts": ["SpaceMono-Regular.ttf"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -36,6 +40,12 @@
     "plugins": [
       "expo-dev-client",
       "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/SpaceMono-Regular.ttf"]
+        }
+      ],
       [
         "expo-splash-screen",
         {
