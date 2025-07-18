@@ -18,14 +18,9 @@
     },
     "preview": {
       "distribution": "internal",
-      "ios": {
-        "resourceClass": "m1-medium",
-        "buildConfiguration": "Release",
-        "simulator": false
-      },
       "android": {
         "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "gradleCommand": ":app:assembleDebug"
       }
     }
   },
